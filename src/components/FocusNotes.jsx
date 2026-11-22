@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Compass, Zap, BrainCircuit } from 'lucide-react';
 
 const FOCUS_SLIDES = [
@@ -25,10 +25,15 @@ const FOCUS_SLIDES = [
   }
 ];
 
+// Interval in milliseconds for automatic slide rotation (5 seconds)
+const AUTO_ADVANCE_INTERVAL = 5000;
+
 export default function FocusNotes() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const totalSlides = FOCUS_SLIDES.length;
+  const timerRef = useRef(null);
 
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
@@ -38,6 +43,22 @@ export default function FocusNotes() {
     setCurrentSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
   };
 
+  // Automatic slide rotation
+  useEffect(() => {
+    if (isPaused) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    timerRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
+    }, AUTO_ADVANCE_INTERVAL);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPaused, totalSlides, currentSlide]);
+
   const active = FOCUS_SLIDES[currentSlide];
   const IconComponent = active.icon;
 
@@ -45,6 +66,10 @@ export default function FocusNotes() {
     <section 
       className="focus-notes-container" 
       aria-label="Focus Notes & Productivity Insights"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocusCapture={() => setIsPaused(true)}
+      onBlurCapture={() => setIsPaused(false)}
     >
       <div className="focus-notes-header">
         <div className="focus-header-meta">
@@ -57,6 +82,7 @@ export default function FocusNotes() {
             className="carousel-nav-btn"
             onClick={handlePrev}
             aria-label="Previous productivity note"
+            title="Previous note"
           >
             <ChevronLeft size={16} />
           </button>
@@ -80,13 +106,14 @@ export default function FocusNotes() {
             className="carousel-nav-btn"
             onClick={handleNext}
             aria-label="Next productivity note"
+            title="Next note"
           >
             <ChevronRight size={16} />
           </button>
         </div>
       </div>
 
-      <div className="focus-slide-content">
+      <div className="focus-slide-content" key={active.id}>
         <div className="focus-icon-container" aria-hidden="true">
           <IconComponent size={20} className="focus-slide-icon" />
         </div>
