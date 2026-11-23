@@ -1,8 +1,12 @@
 {
   "name": "focusboard",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
+  "description": "> **Project Name**: FocusBoard   > **Built for**: MobileFirst Candidate Implementation Assignment   > **Tech Stack**: React.js, Vite, JavaScript (ES6+), CSS3, Lucide React, HTML5, LocalStorage",
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "vite.config.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
